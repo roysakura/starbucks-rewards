@@ -28,14 +28,14 @@ def load_data():
     
     Argument:
 
-    database_filepath:the path for locating the sqllit database
-    table: the data table for stroing the data
+    None
 
     return:
 
-    X: training dataset
-    Y: target datasest
-    category: the category name list
+    X_train: training dataset
+    X_test: validate datasest
+    y_train: training target dataset
+    y_test: validate datasest
     '''
     data = pd.read_csv('../data/data.csv')
 
@@ -51,12 +51,22 @@ def load_data():
 def build_model(X_train, X_test, y_train, y_test):
     '''
     Use sklearn pipeline to build up the model
+    
+    Argument:
 
+    X_train: training dataset
+    X_test: validate datasest
+    y_train: training target dataset
+    y_test: validate datasest
+    
     Return:
+    
+    built model
 
-    A pipeline object
 
     '''
+    ## Here I will use xgboost classifier for mahcine learning algorithum
+
     model = XGBClassifier(max_depth=7,min_child_weight=1,learning_rate=0.1,n_estimators=1000,objective='binary:logistic',gamma=0,max_delta_step=0,subsample=1,colsample_bytree=1,colsample_bylevel=1,reg_alpha=0,reg_lambda=0,scale_pos_weight=1,seed=1,missing=None)
     clf = model.fit(X_train,y_train, eval_set=[(X_test, y_test)], early_stopping_rounds=100, eval_metric='auc', verbose=True)
     y_pred = clf.predict(X_test)
@@ -66,25 +76,7 @@ def build_model(X_train, X_test, y_train, y_test):
     print("Accuracy: %.2f%%" % (accuracy * 100.0))
     print(metrics.classification_report(y_test, predictions,target_names = ['class 0', 'class 1']))
 
-def optimize_model(model,X_train,Y_train,X_test,Y_test,category_names):
-    '''
-    Optimize model using GridSearchCV
-
-    Arg:
-    model : model object for training
-    X_train, Y_train : Training dataset pair
-    X_test, Y_test: Evaluating dataset pair
-    category_name: category name list
-    '''
-    
-
-def evaluate_model(model):
-    '''
-    Evaluate model by prining out the classification report
-
-    '''
-
-
+    return clf
 
 def save_model(model, model_filepath):
 
