@@ -67,7 +67,7 @@ def build_model(X_train, X_test, y_train, y_test):
     '''
     ## Here I will use xgboost classifier for mahcine learning algorithum
 
-    model = XGBClassifier(max_depth=7,min_child_weight=1,learning_rate=0.1,n_estimators=1000,objective='binary:logistic',gamma=0,max_delta_step=0,subsample=1,colsample_bytree=1,colsample_bylevel=1,reg_alpha=0,reg_lambda=0,scale_pos_weight=1,seed=1,missing=None)
+    model = XGBClassifier(max_depth=2,min_child_weight=13,learning_rate=0.1,n_estimators=1000,objective='binary:logistic',gamma=0,max_delta_step=0,subsample=1,colsample_bytree=0.6)
     clf = model.fit(X_train,y_train, eval_set=[(X_test, y_test)], early_stopping_rounds=100, eval_metric='auc', verbose=True)
     y_pred = clf.predict(X_test)
     predictions = [round(value) for value in y_pred]
@@ -77,6 +77,35 @@ def build_model(X_train, X_test, y_train, y_test):
     print(metrics.classification_report(y_test, predictions,target_names = ['class 0', 'class 1']))
 
     return clf
+
+def optimize_model(X_train,Y_train,X_test,Y_test):
+    '''
+    Optimize model using GridSearchCV
+
+    Arg:
+    model : model object for training
+    X_train, Y_train : Training dataset pair
+    X_test, Y_test: Evaluating dataset pair
+    category_name: category name list
+
+    '''
+    model = XGBClassifier(learning_rate=0.5,n_estimators=300,objective='binary:logistic',gamma=0,max_delta_step=0,verbosity=2)
+    
+    parameters = {
+              'max_depth':[2],
+              'min_child_weight':[13,15,17],
+              'subsample':[1],
+              'colsample_bytree':[0.6]
+              }
+
+    cv = GridSearchCV(estimator=model, param_grid=parameters,cv=5)
+    be = cv.fit(X_train,Y_train.values).best_estimator_
+    print(cv.best_params_)
+    print(cv.best_score_)
+    pred = be.predict(X_test)
+    print(classification_report(Y_test.values,pred))
+
+    model = be
 
 def save_model(model, model_filepath):
 
@@ -99,6 +128,10 @@ def main():
     '''
     print('Loading data...\n')
     X_train, X_test, Y_train, Y_test = load_data()
+    
+
+    #print('Optimizing data...\n')
+    #model = optimize_model(X_train,Y_train,X_test,Y_test)
     
     print('Building model...\n')
     model = build_model(X_train, X_test, Y_train, Y_test)
